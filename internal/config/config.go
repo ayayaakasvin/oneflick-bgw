@@ -3,9 +3,8 @@ package config
 import (
 	"log"
 	"os"
-	"time"
 
-	"github.com/ilyakaznacheev/cleanenv"
+	// "github.com/ilyakaznacheev/cleanenv"
 	"github.com/joho/godotenv"
 )
 
@@ -19,7 +18,6 @@ const (
 type Config struct {
 	Database   		StorageConfig	
 	Valkey     		RedisConfig
-	TickerInterval	time.Duration	`yaml:"ticker_interval"			env-default:10m`
 }
 
 type StorageConfig struct {
@@ -46,9 +44,9 @@ func MustLoadConfig() *Config {
 	}
 
 	var cfg Config
-	if err := cleanenv.ReadConfig(configPath, &cfg); err != nil {
-		log.Fatalf("failed to read config file: %s", err.Error())
-	}
+	// if err := cleanenv.ReadConfig(configPath, &cfg); err != nil {
+	// 	log.Fatalf("failed to read config file: %s", err.Error())
+	// }
 
 	postgresURL := os.Getenv(postgresURLEnvKey)
 	valkeyURL := os.Getenv(valkeyURLEnvKey)

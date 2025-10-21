@@ -3,8 +3,6 @@ package worker
 import (
 	"context"
 	"time"
-
-	"github.com/sirupsen/logrus"
 )
 
 type JobHandler interface {
@@ -30,8 +28,4 @@ func NewJob(id string, operation JobHandler, tt time.Duration, executeOnceRun bo
 		interval:  	tt,
 		executeOnceRun: executeOnceRun,
 	}
-}
-
-func (j *Job) StartUpJobLog(logger *logrus.Entry) {
-	logger.Infof("Job %s running...", j.ID)
 }

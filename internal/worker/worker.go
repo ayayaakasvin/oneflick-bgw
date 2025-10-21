@@ -6,7 +6,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 )
 
@@ -37,10 +36,10 @@ func NewWorker(
 	}
 }
 
-func (w *Worker) Submit(fn JobFunc, interval time.Duration, executeOnceRun bool) {
+func (w *Worker) AddJob(j ...Job) {
 	w.mu.Lock()
 	defer w.mu.Unlock()
-	w.jobs = append(w.jobs, NewJob(uuid.NewString(), fn, interval, executeOnceRun))
+	w.jobs = append(w.jobs, j...)
 }
 
 func (w *Worker) Run() {
@@ -59,8 +58,6 @@ func (w *Worker) Run() {
 			ticker := time.NewTicker(job.interval)
 			defer ticker.Stop()
 
-			job.StartUpJobLog(jobLogger)
-
 			if j.executeOnceRun {
 				if err := job.operation.Run(w.ctx); err != nil {
 						if errors.Is(err, ErrFatal) {
@@ -77,13 +74,7 @@ func (w *Worker) Run() {
 				select {
 				case <-ticker.C:
 					if err := job.operation.Run(w.ctx); err != nil {
-						if errors.Is(err, ErrFatal) {
-							w.logger.Error(err)
-							w.cancel()
-							return
-						}
-
-						jobLogger.Warnf("Error recieved but not fatal: %s", err.Error())
+						w.cancel()
 					}
 				case <-w.ctx.Done():
 					jobLogger.Errorf("Critical error recieved from worker %s: %s", job.ID, w.ctx.Err())
@@ -92,13 +83,6 @@ func (w *Worker) Run() {
 			}
 		}()
 	}
-}
-
-func (w *Worker) Shutdown() {
-	// t.eventRepo.Close()
-	// t.cache.Close()
-
-	w.logger.Info("shutting down")
 }
 
 // Thread-safe snapshot (for iterating)

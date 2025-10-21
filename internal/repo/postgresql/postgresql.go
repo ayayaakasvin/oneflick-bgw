@@ -37,6 +37,10 @@ func NewPostgreSQLConnection(dbConfig config.StorageConfig, shutdownChannel inne
 	return psql
 }
 
+func (p *PostgreSQL) Ping() error {
+	return p.conn.Ping()
+}
+
 func (p *PostgreSQL) Close() error {
 	return p.conn.Close()
 }
